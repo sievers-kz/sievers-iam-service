@@ -65,4 +65,28 @@ var (
 		"compromised_password_error",
 		"Password is weak",
 	)
+
+	ErrEmailRequired = NewErrDomain(
+		ErrCategoryTypeValidation,
+		"email_required_error",
+		"Email is required",
+	)
+
+	ErrInvalidEmail = NewErrDomain(
+		ErrCategoryTypeValidation,
+		"invalid_email_error",
+		"Invalid email",
+	)
+
+	ErrPasswordRequired = NewErrDomain(
+		ErrCategoryTypeValidation,
+		"password_required_error",
+		"Password is required",
+	)
+
+	ErrInvalidPassword = NewErrDomain(
+		ErrCategoryTypeValidation,
+		"invalid_password_error",
+		"Invalid password",
+	)
 )
