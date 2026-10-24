@@ -3,10 +3,8 @@ package domain
 type TokenType string
 
 const (
-	TokenTypeRefresh  TokenType = "refresh"
-	TokenTypeAccess   TokenType = "access"
-	TokenTypeEmail    TokenType = "email"
-	TokenTypePassword TokenType = "password"
+	TokenTypeRefresh TokenType = "refresh"
+	TokenTypeAccess  TokenType = "access"
 )
 
 type OTPType string

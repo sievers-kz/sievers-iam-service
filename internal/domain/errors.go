@@ -89,4 +89,22 @@ var (
 		"invalid_password_error",
 		"Invalid password",
 	)
+
+	ErrAccountAlreadyConfirmed = NewErrDomain(
+		ErrCategoryTypeConflict,
+		"account_already_confirmed_error",
+		"Account already confirmed",
+	)
+
+	ErrTokenAlreadyRevoked = NewErrDomain(
+		ErrCategoryTypeConflict,
+		"token_already_revoked_error",
+		"Token already revoked",
+	)
+
+	ErrInvalidToken = NewErrDomain(
+		ErrCategoryTypeUnauthorized,
+		"invalid_token_error",
+		"Invalid token",
+	)
 )
