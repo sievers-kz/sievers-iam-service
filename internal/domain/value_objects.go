@@ -2,6 +2,7 @@ package domain
 
 import (
 	"regexp"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -12,14 +13,16 @@ type Email struct {
 }
 
 func NewEmail(value string) (Email, error) {
-	newEmail := Email{value: value}
+	normalized := strings.ToLower(strings.TrimSpace(value))
+	newEmail := Email{value: normalized}
+
 	if err := newEmail.validateRequired(); err != nil {
 		return Email{}, err
 	}
-
 	if err := newEmail.validateFormat(); err != nil {
 		return Email{}, err
 	}
+
 	return newEmail, nil
 }
 
