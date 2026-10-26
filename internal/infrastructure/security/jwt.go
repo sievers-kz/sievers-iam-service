@@ -47,13 +47,13 @@ func (t *TokenService) GeneratePair(accountID uuid.UUID) (TokenPair, error) {
 	accessExpiration := now.Add(t.accessLifetime)
 	accessSignedToken, accessSignErr := t.sign(accountID, domain.TokenTypeAccess, accessExpiration)
 	if accessSignErr != nil {
-		return TokenPair{}, accessSignErr
+		return TokenPair{}, domain.ErrInvalidToken
 	}
 
 	refreshExpiration := now.Add(t.refreshLifetime)
 	refreshSignedToken, refreshSignErr := t.sign(accountID, domain.TokenTypeRefresh, refreshExpiration)
 	if refreshSignErr != nil {
-		return TokenPair{}, refreshSignErr
+		return TokenPair{}, domain.ErrInvalidToken
 	}
 
 	return TokenPair{Access: accessSignedToken, Refresh: refreshSignedToken}, nil
