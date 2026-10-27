@@ -15,6 +15,7 @@ type AuthConfig struct {
 	JWTPublicKeyPath     string        `env:"JWT_PUBLIC_KEY_PATH,required"`
 	AccessTokenLifetime  time.Duration `env:"ACCESS_TOKEN_LIFETIME" envDefault:"30m"`
 	RefreshTokenLifetime time.Duration `env:"REFRESH_TOKEN_LIFETIME" envDefault:"72h"`
+	BloomPath            string        `env:"BLOOM_PATH"`
 }
 
 type AppConfig struct {
