@@ -41,3 +41,6 @@ go.work.sum
 certs/*
 !certs/README.md
 
+data/*
+!data/README.md
+*.bloom
