@@ -37,3 +37,7 @@ go.work.sum
 
 *.pem
 /keys/
+
+certs/*
+!certs/README.md
+
