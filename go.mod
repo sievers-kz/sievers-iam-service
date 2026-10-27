@@ -9,6 +9,8 @@ require (
 
 require (
 	github.com/alexedwards/argon2id v1.0.0 // indirect
+	github.com/bits-and-blooms/bitset v1.24.2 // indirect
+	github.com/bits-and-blooms/bloom/v3 v3.7.1 // indirect
 	github.com/caarlos0/env/v11 v11.4.1 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
