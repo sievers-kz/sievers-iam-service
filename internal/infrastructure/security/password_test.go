@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/alexedwards/argon2id"
+	"github.com/bits-and-blooms/bloom/v3"
 	"github.com/sievers-kz/sievers-iam-service/internal/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -12,7 +13,7 @@ import (
 
 func newTestPasswordService(t *testing.T) *PasswordService {
 	t.Helper()
-	svc := NewPasswordService()
+	svc := NewPasswordService(nil)
 
 	testHashParams := argon2id.Params{
 		Memory:      1024,
@@ -24,6 +25,27 @@ func newTestPasswordService(t *testing.T) *PasswordService {
 
 	svc.hashParams = &testHashParams
 	return svc
+}
+
+func TestValidate(t *testing.T) {
+	filter := bloom.NewWithEstimates(10, 0.01)
+	filter.Add([]byte("compromisedPassword"))
+
+	svc := newTestPasswordService(t)
+	svc.bloomFilter = filter
+
+	uniquePassword, err := svc.Validate("uniquePassword")
+	require.NoError(t, err)
+	require.Equal(t, "uniquePassword", uniquePassword.Value())
+
+	compromisedPassword, err := svc.Validate("compromisedPassword")
+	require.ErrorIs(t, err, domain.ErrCompromisedPassword)
+	require.Equal(t, domain.PlainPassword{}, compromisedPassword)
+
+	svc.bloomFilter = nil
+	validatedPassword, err := svc.Validate("compromisedPassword")
+	require.NoError(t, err)
+	require.Equal(t, "compromisedPassword", validatedPassword.Value())
 }
 
 func TestHash(t *testing.T) {

@@ -2,15 +2,18 @@ package security
 
 import (
 	"github.com/alexedwards/argon2id"
+	"github.com/bits-and-blooms/bloom/v3"
 	"github.com/sievers-kz/sievers-iam-service/internal/domain"
 )
 
 type PasswordService struct {
-	hashParams *argon2id.Params
+	bloomFilter *bloom.BloomFilter
+	hashParams  *argon2id.Params
 }
 
-func NewPasswordService() *PasswordService {
+func NewPasswordService(bloomFilter *bloom.BloomFilter) *PasswordService {
 	return &PasswordService{
+		bloomFilter: bloomFilter,
 		hashParams: &argon2id.Params{
 			Memory:      64 * 1024,
 			Iterations:  3,
@@ -27,7 +30,15 @@ func (ps *PasswordService) Validate(plainPassword string) (domain.PlainPassword,
 		return domain.PlainPassword{}, err
 	}
 
-	// TODO: здесь должна быть проверка по черному списку паролей (bloom)
+	filter := ps.bloomFilter
+	if filter == nil {
+		return validatedPlain, nil
+	}
+
+	match := filter.Test([]byte(validatedPlain.Value()))
+	if match {
+		return domain.PlainPassword{}, domain.ErrCompromisedPassword
+	}
 
 	return validatedPlain, nil
 }
