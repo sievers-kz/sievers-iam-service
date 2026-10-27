@@ -11,7 +11,13 @@ type PasswordService struct {
 
 func NewPasswordService() *PasswordService {
 	return &PasswordService{
-		hashParams: argon2id.DefaultParams,
+		hashParams: &argon2id.Params{
+			Memory:      64 * 1024,
+			Iterations:  3,
+			Parallelism: 2,
+			SaltLength:  16,
+			KeyLength:   32,
+		},
 	}
 }
 
