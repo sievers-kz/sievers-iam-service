@@ -6,19 +6,9 @@ import (
 	"uuid"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sievers-kz/sievers-iam-service/internal/application/token"
 	"github.com/sievers-kz/sievers-iam-service/internal/domain"
 )
-
-type Token struct {
-	Value     string
-	Type      domain.TokenType
-	ExpiresAt time.Time
-}
-
-type TokenPair struct {
-	Access  Token
-	Refresh Token
-}
 
 type TokenService struct {
 	privateKey      *rsa.PrivateKey
@@ -41,29 +31,29 @@ func NewTokenService(
 	}
 }
 
-func (t *TokenService) GeneratePair(accountID uuid.UUID) (TokenPair, error) {
+func (t *TokenService) GeneratePair(accountID uuid.UUID) (token.Pair, error) {
 	now := time.Now().UTC()
 
 	accessExpiration := now.Add(t.accessLifetime)
 	accessSignedToken, accessSignErr := t.sign(accountID, domain.TokenTypeAccess, accessExpiration)
 	if accessSignErr != nil {
-		return TokenPair{}, domain.ErrInvalidToken
+		return token.Pair{}, domain.ErrInvalidToken
 	}
 
 	refreshExpiration := now.Add(t.refreshLifetime)
 	refreshSignedToken, refreshSignErr := t.sign(accountID, domain.TokenTypeRefresh, refreshExpiration)
 	if refreshSignErr != nil {
-		return TokenPair{}, domain.ErrInvalidToken
+		return token.Pair{}, domain.ErrInvalidToken
 	}
 
-	return TokenPair{Access: accessSignedToken, Refresh: refreshSignedToken}, nil
+	return token.Pair{Access: accessSignedToken, Refresh: refreshSignedToken}, nil
 }
 
 func (t *TokenService) sign(
 	accountID uuid.UUID,
 	tokenType domain.TokenType,
 	expiresAt time.Time,
-) (Token, error) {
+) (token.Token, error) {
 	claims := jwt.MapClaims{
 		"jti":  uuid.New().String(),
 		"sub":  accountID.String(),
@@ -71,13 +61,13 @@ func (t *TokenService) sign(
 		"type": tokenType,
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	signed, err := token.SignedString(t.privateKey)
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	signed, err := tokenClaims.SignedString(t.privateKey)
 	if err != nil {
-		return Token{}, err
+		return token.Token{}, err
 	}
 
-	return Token{
+	return token.Token{
 		Value:     signed,
 		Type:      tokenType,
 		ExpiresAt: expiresAt,
@@ -85,7 +75,7 @@ func (t *TokenService) sign(
 }
 
 func (t *TokenService) VerifyToken(tokenValue string, tokenType domain.TokenType) (uuid.UUID, error) {
-	token, err := jwt.Parse(tokenValue, func(token *jwt.Token) (any, error) {
+	parsedToken, err := jwt.Parse(tokenValue, func(parsed *jwt.Token) (any, error) {
 		return t.publicKey, nil
 	}, jwt.WithValidMethods([]string{"RS256"}), jwt.WithExpirationRequired())
 
@@ -93,7 +83,7 @@ func (t *TokenService) VerifyToken(tokenValue string, tokenType domain.TokenType
 		return uuid.Nil(), domain.ErrInvalidToken
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
 		return uuid.Nil(), domain.ErrInvalidToken
 	}
